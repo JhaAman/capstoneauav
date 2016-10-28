@@ -80,6 +80,10 @@ class Detector:
 
         return img, cx, cy
 
+	def parse_odometry(self, imudata):
+		#use dx/dt to get velocity, add corresponding counter-values to the next command
+
+
 class StaticObjectDetectorNode:
     def __init__(self):
         self.name = 'static_object_detector_node'
@@ -88,6 +92,8 @@ class StaticObjectDetectorNode:
         self.thread_lock = threading.Lock()
         self.sub_image = rospy.Subscriber("/ardrone/image_raw", Image, self.cbImage, queue_size=1)
         self.pub_image = rospy.Publisher("~detection_image", Image, queue_size=1)
+
+	self.sub_odometry = rospy.Subscriber("/ardrone/odometry", Twist, self.parse_odometry, queue_size=1)
 
         #self.pub_twist = rospy.Publisher('/ardrone/cmd_vel', Twist, queue_size = 1)
         self.pub_twist = rospy.Publisher('cmd_vel', Twist, queue_size = 1)
@@ -114,7 +120,7 @@ class StaticObjectDetectorNode:
 
         twist = Twist()
         speed = 0.0 ## 0.5
-        turn = 0.3 ##1.0
+        turn = 1 #leave this as 1 and change kp/d/i instead
         x,y,z,th = (0,0,0,0)
 	#PID control constants	
 	kp = -1	
@@ -132,9 +138,8 @@ class StaticObjectDetectorNode:
 
         twist.linear.x = x*speed; twist.linear.y = y*speed; twist.linear.z = z*speed;
 	twist.angular.x = 0; twist.angular.y = 0; twist.angular.z = th*turn
-	self.pub_twist.publish(twist)            
-
-
+	self.pub_twist.publish(twist)             
+	
 #	print "s1"
 #	rospy.sleep(.3)
 #	print "s2"
