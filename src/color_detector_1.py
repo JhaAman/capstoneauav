@@ -14,7 +14,9 @@ import time
 #originally a copy of Mr. Batra's drone_detector program
 
 class Detector:
+
     YELLOW = [np.array(x, np.uint8) for x in [[15,150,100], [35, 255, 255]] ]
+
     MAX_DETECTIONS = 1
     ERODE = (5,5)
     
@@ -57,7 +59,9 @@ class Detector:
         '''
 
         height,width = img.shape[:2]
+
         cx, cy = (.5,.5)
+
         # get filtered contours
         contours = self.get_filtered_contours(img)
         j = 0
@@ -68,6 +72,7 @@ class Detector:
             font = cv2.FONT_HERSHEY_SIMPLEX
             cv2.putText(img,"yellow", (x,y), font, 1,mean_color,4)
             cv2.rectangle(img,(x,y),(x+w,y+h), mean_color,2)
+
             if j == 1 and w>100 and h>100:
               	cx = float(x + w/2)/width
               	cy = float(y + h/2)/height
@@ -83,21 +88,14 @@ class StaticObjectDetectorNode:
         self.thread_lock = threading.Lock()
         self.sub_image = rospy.Subscriber("/ardrone/image_raw", Image, self.cbImage, queue_size=1)
         self.pub_image = rospy.Publisher("~detection_image", Image, queue_size=1)
+
+        #self.pub_twist = rospy.Publisher('/ardrone/cmd_vel', Twist, queue_size = 1)
         self.pub_twist = rospy.Publisher('cmd_vel', Twist, queue_size = 1)
         
-
-#        self.takeoff = rospy.Publisher('/takeoff',Empty)
-#        self.takeoff.publish(Empty)
-
-#	print "0"
-#	pubtakeoff = rospy.Publisher('ardrone/takeoff', Empty, queue_size = 1)
-#	rospy.sleep(5)
-#        takeoff()
-#	print "1"
-
         self.bridge = CvBridge()
         rospy.loginfo("[%s] Initialized." %(self.name))
-	self.takeoff = rospy.Publisher('/takeoff',Empty)
+        self.takeoff = rospy.Publisher('/takeoff',Empty)
+
         self.takeoff.publish(Empty)
 
     def cbImage(self,image_msg):
@@ -136,6 +134,7 @@ class StaticObjectDetectorNode:
 	twist.angular.x = 0; twist.angular.y = 0; twist.angular.z = th*turn
 	self.pub_twist.publish(twist)            
 
+
 #	print "s1"
 #	rospy.sleep(.3)
 #	print "s2"
@@ -150,15 +149,10 @@ class StaticObjectDetectorNode:
 
         self.thread_lock.release()
 
-#	def takeoff():
-#	print "taking off"
-#	pubtakeoff.publish(Empty())
-
 if __name__=="__main__":
-	
 	rospy.init_node('static_object_detector_node')
- #       time.sleep(5)
-	
+        #time.sleep(3)
+        
 	node = StaticObjectDetectorNode()
 
 	rospy.spin()
