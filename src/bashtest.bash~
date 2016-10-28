@@ -1,0 +1,5 @@
+#!/bin/bash
+
+ls ~/capstoneauav
+rostopic pub \/ardrone\/takeoff std_msgs\/Empty
+
